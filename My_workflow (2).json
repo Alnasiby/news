@@ -1,0 +1,222 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "mindcraft-gpt4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        800,
+        480
+      ],
+      "id": "45bdb154-cc5e-489a-9694-56afd4ae5470",
+      "name": "Azure OpenAI Chat Model",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "bdSNgxJJkLDTPqQU",
+          "name": "Azure Open AI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        960,
+        220
+      ],
+      "id": "c201761c-fb59-451e-a504-1c93d61f3c51",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "gl": "in",
+          "google_domain": "google.com",
+          "hl": "en"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        420
+      ],
+      "id": "384834fa-d998-4165-a46f-d2f3fcb75779",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "tJlgX4BkiVECkcBe",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "8WxLaoodYxa7XSK2rCiWuP3nqwWUShSUVd5FrjEYSqqROfIwc0qzJQQJ99BFAC77bzfXJ3w3AAABACOGweqQ",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1180,
+        480
+      ],
+      "id": "2a8d1856-1af3-4fc2-be6c-59d0d63acbd5",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "daysInterval": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        420,
+        220
+      ],
+      "id": "d2f1e276-1c39-45dc-aab2-50f26acd8972",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2638a8c8-2143-46ca-b766-dd7d9ec44d53",
+              "name": "prompt",
+              "value": "Fetch and summarize the top 10 latest and most important news stories from the internet . Rank them based on relevance, impact, and popularity. Provide title, a 1-line summary, and the source link.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        700,
+        220
+      ],
+      "id": "ce1ea744-3fb5-4ad5-b002-86cc30068c52",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $json.output.slice(0, 1999) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        220
+      ],
+      "id": "ff7ff932-9c15-4333-b39a-406528cd9687",
+      "name": "Discord",
+      "webhookId": "c72bf4ee-2fe5-4077-b467-b356c18f0b38",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "j7BwzZDho1mkbmC8",
+          "name": "Discord Webhook account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b9c26813-9063-4984-bfa6-0a507520bac9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "64c3f3e5cfb7717d75ef266beb14b3b5cbb40c5132ceec01438d10eb6496040e"
+  },
+  "id": "7Ka2FYjbMgOLdv2i",
+  "tags": []
+}
